@@ -35,14 +35,31 @@ export class FormSubmitObserver {
       const form = event.target instanceof HTMLFormElement ? event.target : undefined
       const submitter = event.submitter || undefined
 
-      if (form) {
-        const method = submitter?.getAttribute("formmethod") || form.method
-
-        if (method != "dialog" && this.delegate.willSubmitForm(form, submitter)) {
-          event.preventDefault()
-          this.delegate.formSubmitted(form, submitter)
-        }
+      if (form
+        && submissionDoesNotDismissDialog(form, submitter)
+        && submissionDoesNotTargetIFrame(form, submitter)
+        && this.delegate.willSubmitForm(form, submitter)) {
+        event.preventDefault()
+        this.delegate.formSubmitted(form, submitter)
       }
     }
   })
+}
+
+function submissionDoesNotDismissDialog(form: HTMLFormElement, submitter?: HTMLElement): boolean {
+  const method = submitter?.getAttribute("formmethod") || form.method
+
+  return method != "dialog"
+}
+
+function submissionDoesNotTargetIFrame(form: HTMLFormElement, submitter?: HTMLElement): boolean {
+  const target = submitter?.getAttribute("formtarget") || form.target
+
+  if (target) {
+    const iframeExists = !!document.querySelector(`iframe[name="${target}"]`)
+
+    return !iframeExists
+  } else {
+    return true
+  }
 }

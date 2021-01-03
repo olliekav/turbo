@@ -263,6 +263,13 @@ export class NavigationTests extends TurboDriveTestCase {
     this.assert.equal(await this.pathname, "/__turbo/delayed_response")
     this.assert.equal(await this.visitAction, "advance")
   }
+
+  async "test ignores links that target an iframe"() {
+    await this.clickSelector("#targets-iframe")
+    await this.nextBeat
+
+    this.assert.equal(await this.pathname, "/src/tests/fixtures/navigation.html")
+  }
 }
 
 NavigationTests.registerSuite()

@@ -144,6 +144,14 @@
           <button formmethod="dialog">Close</button>
         </form>
       </dialog>
+
+      <form action="/src/tests/fixtures/one.html" method="get" target="iframe">
+        <button>Submit iframe target</button>
+      </form>
+
+      <form action="/src/tests/fixtures/one.html" method="get">
+        <button formtarget="iframe">Submit iframe formtarget</button>
+      </form>
     </div>
     <hr>
     <div id="targets-frame">
@@ -219,5 +227,6 @@
     <a href="/__turbo/messages?content=Link!&type=stream" data-turbo-method="post" id="link-method-outside-frame">Stream link outside frame</a>
     <hr>
     <turbo-frame id="hello"></turbo-frame>
+    <iframe name="iframe"></iframe>
   </body>
 </html>
