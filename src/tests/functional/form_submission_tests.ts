@@ -28,6 +28,13 @@ export class FormSubmissionTests extends TurboDriveTestCase {
     this.assert.notOk(await this.hasSelector(".turbo-progress-bar"), "does not show progress bar before delay")
   }
 
+  async "test form submission toggles submitter [disabled] attribute"() {
+    await this.clickSelector("#standard-form-submit")
+
+    this.assert.equal(await this.nextAttributeMutationNamed("standard-form-submit", "disabled"), "", "sets [disabled] on the submitter")
+    this.assert.equal(await this.nextAttributeMutationNamed("standard-form-submit", "disabled"), null, "removes [disabled] from the submitter")
+  }
+
   async "test standard form submission with redirect response"() {
     await this.clickSelector("#standard form.redirect input[type=submit]")
     await this.nextBody
@@ -309,6 +316,13 @@ export class FormSubmissionTests extends TurboDriveTestCase {
     const title = await this.querySelector("#frame h2")
     this.assert.equal(await title.getVisibleText(), "Frame: Loaded")
     this.assert.equal(await this.nextAttributeMutationNamed("frame", "busy"), null, "removes [busy] from the #frame")
+  }
+
+  async "test frame form submission toggles submitter's [disabled] attribute"() {
+    await this.clickSelector("#targets-frame-form-submit")
+
+    this.assert.equal(await this.nextAttributeMutationNamed("targets-frame-form-submit", "disabled"), "", "sets [disabled] on the submitter")
+    this.assert.equal(await this.nextAttributeMutationNamed("targets-frame-form-submit", "disabled"), null, "removes [disabled] from the submitter")
   }
 
   async "test frame form submission with empty created response"() {
