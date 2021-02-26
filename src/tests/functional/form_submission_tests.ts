@@ -311,6 +311,16 @@ export class FormSubmissionTests extends TurboDriveTestCase {
     this.assert.equal(await this.nextAttributeMutationNamed("frame", "busy"), null, "removes [busy] from the #frame")
   }
 
+  async "test frame form submission with [data-turbo-frame=_top]"() {
+    await this.clickSelector("#frame form.redirect[data-turbo-frame=_top] input[type=submit]")
+    await this.nextBody
+
+    const title = await this.querySelector("h1")
+    this.assert.equal(await this.pathname, "/src/tests/fixtures/one.html")
+    this.assert.equal(await title.getVisibleText(), "One", "follows form redirect")
+    this.assert.notOk(await this.hasSelector("#frame"), "redirects entire page")
+  }
+
   async "test frame form submission with empty created response"() {
     const htmlBefore = await this.outerHTMLForSelector("#frame")
     const button = await this.querySelector("#frame form.created input[type=submit]")
@@ -355,6 +365,15 @@ export class FormSubmissionTests extends TurboDriveTestCase {
     const title = await this.querySelector("#frame h2")
     this.assert.ok(await this.hasSelector("#reject form"), "only replaces frame")
     this.assert.equal(await title.getVisibleText(), "Frame: Internal Server Error")
+  }
+
+  async "test invalid frame form submission in turbo-frame[data-turbo-frame=_top]"() {
+    await this.clickSelector("#frame form.unprocessable_entity[data-turbo-frame=_top] input[type=submit]")
+    await this.nextBeat
+
+    const title = await this.querySelector("#frame h2")
+    this.assert.equal(await title.getVisibleText(), "Frame: Unprocessable Entity", "renders the response HTML inside the frame")
+    this.assert.ok(await this.hasSelector("#form-title"), "does no replace entire page")
   }
 
   async "test frame form submission with stream response"() {
