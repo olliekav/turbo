@@ -2,7 +2,7 @@ import { FrameElement, FrameElementDelegate, FrameLoadingStyle } from "../../ele
 import { FetchMethod, FetchRequest, FetchRequestDelegate, FetchRequestHeaders } from "../../http/fetch_request"
 import { FetchResponse } from "../../http/fetch_response"
 import { AppearanceObserver, AppearanceObserverDelegate } from "../../observers/appearance_observer"
-import { parseHTMLDocument } from "../../util"
+import { clearBusy, parseHTMLDocument, setBusy } from "../../util"
 import { FormSubmission, FormSubmissionDelegate } from "../drive/form_submission"
 import { Snapshot } from "../snapshot"
 import { ViewDelegate } from "../view"
@@ -167,7 +167,7 @@ export class FrameController implements AppearanceObserverDelegate, FetchRequest
   }
 
   requestStarted(request: FetchRequest) {
-    this.element.setAttribute("busy", "")
+    [ this.element, document.documentElement ].forEach(setBusy)
   }
 
   requestPreventedHandlingResponse(request: FetchRequest, response: FetchResponse) {
@@ -190,14 +190,13 @@ export class FrameController implements AppearanceObserverDelegate, FetchRequest
   }
 
   requestFinished(request: FetchRequest) {
-    this.element.removeAttribute("busy")
+    [ this.element, document.documentElement ].forEach(clearBusy)
   }
 
   // Form submission delegate
 
   formSubmissionStarted(formSubmission: FormSubmission) {
-    const frame = this.findFrameElement(formSubmission.formElement)
-    frame.setAttribute("busy", "")
+    [ formSubmission.formElement, this.findFrameElement(formSubmission.formElement), document.documentElement ].forEach(setBusy)
   }
 
   formSubmissionSucceededWithResponse(formSubmission: FormSubmission, response: FetchResponse) {
@@ -214,8 +213,7 @@ export class FrameController implements AppearanceObserverDelegate, FetchRequest
   }
 
   formSubmissionFinished(formSubmission: FormSubmission) {
-    const frame = this.findFrameElement(formSubmission.formElement)
-    frame.removeAttribute("busy")
+    [ formSubmission.formElement, this.findFrameElement(formSubmission.formElement), document.documentElement ].forEach(clearBusy)
   }
 
   // View delegate

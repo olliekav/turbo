@@ -49,3 +49,11 @@ export function uuid() {
     }
   }).join("")
 }
+
+export function setBusy(element: Element) {
+  element.setAttribute("data-turbo-busy", "")
+}
+
+export function clearBusy(element: Element) {
+  element.removeAttribute("data-turbo-busy")
+}

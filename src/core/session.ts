@@ -12,7 +12,7 @@ import { ScrollObserver } from "../observers/scroll_observer"
 import { StreamMessage } from "./streams/stream_message"
 import { StreamObserver } from "../observers/stream_observer"
 import { Action, Position, StreamSource, isAction } from "./types"
-import { dispatch } from "../util"
+import { clearBusy, dispatch, setBusy } from "../util"
 import { PageView, PageViewDelegate } from "./drive/page_view"
 import { Visit, VisitOptions } from "./drive/visit"
 import { PageSnapshot } from "./drive/page_snapshot"
@@ -269,6 +269,7 @@ export class Session implements FormSubmitObserverDelegate, HistoryDelegate, Lin
   }
 
   notifyApplicationAfterVisitingLocation(location: URL, action: Action) {
+    setBusy(document.documentElement)
     return dispatch("turbo:visit", { detail: { url: location.href, action } })
   }
 
@@ -285,6 +286,7 @@ export class Session implements FormSubmitObserverDelegate, HistoryDelegate, Lin
   }
 
   notifyApplicationAfterPageLoad(timing: TimingData = {}) {
+    clearBusy(document.documentElement)
     return dispatch("turbo:load", { detail: { url: this.location.href, timing }})
   }
 
