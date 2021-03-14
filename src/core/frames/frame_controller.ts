@@ -12,6 +12,7 @@ import { FrameView } from "./frame_view"
 import { LinkInterceptor, LinkInterceptorDelegate } from "./link_interceptor"
 import { FrameRenderer } from "./frame_renderer"
 import { session } from "../index"
+import { navigator } from "../../core"
 
 export class FrameController implements AppearanceObserverDelegate, FetchRequestDelegate, FormInterceptorDelegate, FormSubmissionDelegate, FrameElementDelegate, LinkInterceptorDelegate, ViewDelegate<Snapshot<FrameElement>> {
   readonly element: FrameElement
@@ -202,7 +203,16 @@ export class FrameController implements AppearanceObserverDelegate, FetchRequest
 
   formSubmissionSucceededWithResponse(formSubmission: FormSubmission, response: FetchResponse) {
     const frame = this.findFrameElement(formSubmission.formElement, formSubmission.submitter)
-    frame.delegate.loadResponse(response)
+    const target = formSubmission.formElement.getAttribute("data-turbo-frame")
+      || formSubmission.submitter?.getAttribute("data-turbo-frame")
+      || frame.getAttribute("data-turbo-frame")
+
+    if (response.redirected && target == "_top") {
+      navigator.formSubmission = formSubmission
+      navigator.formSubmissionSucceededWithResponse(formSubmission, response)
+    } else {
+      frame.delegate.loadResponse(response)
+    }
   }
 
   formSubmissionFailedWithResponse(formSubmission: FormSubmission, fetchResponse: FetchResponse) {
@@ -299,7 +309,7 @@ export class FrameController implements AppearanceObserverDelegate, FetchRequest
       return false
     }
 
-    return true
+    return this.element == element.closest("turbo-frame:not([disabled])")
   }
 
   // Computed properties
