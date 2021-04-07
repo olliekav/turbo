@@ -30,7 +30,7 @@ export class Session implements FormSubmitObserverDelegate, HistoryDelegate, Lin
   readonly pageObserver = new PageObserver(this)
   readonly cacheObserver = new CacheObserver()
   readonly linkClickObserver = new LinkClickObserver(this)
-  readonly formSubmitObserver = new FormSubmitObserver(this)
+  readonly formSubmitObserver = new FormSubmitObserver(this, document)
   readonly scrollObserver = new ScrollObserver(this)
   readonly streamObserver = new StreamObserver(this)
 
