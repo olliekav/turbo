@@ -25,6 +25,14 @@ export class FrameTests extends TurboDriveTestCase {
     this.assert.equal(otherEvents.length, 0, "no more events")
   }
 
+  async "test a frame request with Turbo-Frame=_top header in response"() {
+    await this.clickSelector("#navigate-form-redirect-top")
+    await this.nextBeat
+
+    const title = await this.querySelector("h1")
+    this.assert.equal(await title.getVisibleText(), "Request Headers")
+  }
+
   async "test following a link driving a frame toggles the [busy] attribute"() {
     await this.clickSelector("#hello a")
 

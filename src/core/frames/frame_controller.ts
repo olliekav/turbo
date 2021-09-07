@@ -175,8 +175,12 @@ export class FrameController implements AppearanceObserverDelegate, FetchRequest
   }
 
   async requestSucceededWithResponse(request: FetchRequest, response: FetchResponse) {
-    await this.loadResponse(response)
-    this.resolveVisitPromise()
+    if (response.redirected && response.header("Turbo-Frame") == "_top") {
+      session.visit(response.location)
+    } else {
+      await this.loadResponse(response)
+      this.resolveVisitPromise()
+    }
   }
 
   requestFailedWithResponse(request: FetchRequest, response: FetchResponse) {
@@ -201,8 +205,13 @@ export class FrameController implements AppearanceObserverDelegate, FetchRequest
   }
 
   formSubmissionSucceededWithResponse(formSubmission: FormSubmission, response: FetchResponse) {
-    const frame = this.findFrameElement(formSubmission.formElement, formSubmission.submitter)
-    frame.delegate.loadResponse(response)
+    if (response.redirected && response.header("Turbo-Frame") == "_top") {
+      session.view.clearSnapshotCache()
+      session.visit(response.location)
+    } else {
+      const frame = this.findFrameElement(formSubmission.formElement, formSubmission.submitter)
+      frame.delegate.loadResponse(response)
+    }
   }
 
   formSubmissionFailedWithResponse(formSubmission: FormSubmission, fetchResponse: FetchResponse) {
