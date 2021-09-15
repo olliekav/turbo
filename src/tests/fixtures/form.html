@@ -13,7 +13,7 @@
     </style>
   </head>
   <body>
-    <h1 id="form-title">Form</h1>
+    <h1>Form</h1>
 
     <div id="standard">
       <form action="/__turbo/redirect" method="post" class="redirect">
@@ -218,11 +218,11 @@
       </div>
       <form action="/__turbo/redirect" method="post" class="redirect" data-turbo-frame="_top">
         <input type="hidden" name="path" value="/src/tests/fixtures/one.html">
-        <input type="submit">
+        <button>303 and redirect _top</button>
       </form>
       <form class="unprocessable_entity" action="/__turbo/reject" method="post" data-turbo-frame="_top">
         <input type="hidden" name="status" value="422">
-        <input type="submit">
+        <button>422</button>
       </form>
     </turbo-frame>
     <a href="/__turbo/messages?content=Link!&type=stream" data-turbo-method="post" id="link-method-outside-frame">Stream link outside frame</a>

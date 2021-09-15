@@ -312,7 +312,7 @@ export class FormSubmissionTests extends TurboDriveTestCase {
   }
 
   async "test frame form submission with [data-turbo-frame=_top]"() {
-    await this.clickSelector("#frame form.redirect[data-turbo-frame=_top] input[type=submit]")
+    await this.clickSelector("#frame form.redirect[data-turbo-frame=_top] button")
     await this.nextBody
 
     const title = await this.querySelector("h1")
@@ -368,12 +368,13 @@ export class FormSubmissionTests extends TurboDriveTestCase {
   }
 
   async "test invalid frame form submission in turbo-frame[data-turbo-frame=_top]"() {
-    await this.clickSelector("#frame form.unprocessable_entity[data-turbo-frame=_top] input[type=submit]")
+    await this.clickSelector("#frame form.unprocessable_entity[data-turbo-frame=_top] button")
     await this.nextBeat
 
-    const title = await this.querySelector("#frame h2")
-    this.assert.equal(await title.getVisibleText(), "Frame: Unprocessable Entity", "renders the response HTML inside the frame")
-    this.assert.ok(await this.hasSelector("#form-title"), "does no replace entire page")
+    const title = await this.querySelector("h1")
+    const frameTitle = await this.querySelector("#frame h2")
+    this.assert.equal(await title.getVisibleText(), "Form", "does not replace entire page")
+    this.assert.equal(await frameTitle.getVisibleText(), "Frame: Unprocessable Entity", "renders the response HTML inside the frame")
   }
 
   async "test frame form submission with stream response"() {

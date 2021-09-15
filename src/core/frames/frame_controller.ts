@@ -153,7 +153,11 @@ export class FrameController implements AppearanceObserverDelegate, FetchRequest
     this.reloadable = false
     this.formSubmission = new FormSubmission(this, element, submitter)
     if (this.formSubmission.fetchRequest.isIdempotent) {
-      this.navigateFrame(element, this.formSubmission.fetchRequest.url.href, submitter)
+      if (this.findFrameTarget(element, submitter) == "_top") {
+        navigator.proposeVisit(expandURL(this.formSubmission.fetchRequest.url.href))
+      } else {
+        this.navigateFrame(element, this.formSubmission.fetchRequest.url.href, submitter)
+      }
     } else {
       const { fetchRequest } = this.formSubmission
       this.prepareHeadersForRequest(fetchRequest.headers, fetchRequest)
@@ -202,21 +206,22 @@ export class FrameController implements AppearanceObserverDelegate, FetchRequest
   }
 
   formSubmissionSucceededWithResponse(formSubmission: FormSubmission, response: FetchResponse) {
-    const frame = this.findFrameElement(formSubmission.formElement, formSubmission.submitter)
-    const target = formSubmission.formElement.getAttribute("data-turbo-frame")
-      || formSubmission.submitter?.getAttribute("data-turbo-frame")
-      || frame.getAttribute("data-turbo-frame")
+    const target = this.findFrameTarget(formSubmission.formElement, formSubmission.submitter)
 
     if (response.redirected && target == "_top") {
       navigator.formSubmission = formSubmission
       navigator.formSubmissionSucceededWithResponse(formSubmission, response)
     } else {
+      const frame = this.findFrameElement(formSubmission.formElement, formSubmission.submitter)
+
       frame.delegate.loadResponse(response)
     }
   }
 
   formSubmissionFailedWithResponse(formSubmission: FormSubmission, fetchResponse: FetchResponse) {
-    this.element.delegate.loadResponse(fetchResponse)
+    const frame = this.findFrameElement(formSubmission.formElement, formSubmission.submitter)
+
+    frame.delegate.loadResponse(fetchResponse)
   }
 
   formSubmissionErrored(formSubmission: FormSubmission, error: Error) {
@@ -260,8 +265,12 @@ export class FrameController implements AppearanceObserverDelegate, FetchRequest
     frame.src = url
   }
 
+  private findFrameTarget(element: Element, submitter?: Element) {
+    return submitter?.getAttribute("data-turbo-frame") || element.getAttribute("data-turbo-frame") || this.element.getAttribute("target")
+  }
+
   private findFrameElement(element: Element, submitter?: HTMLElement) {
-    const id = submitter?.getAttribute("data-turbo-frame") || element.getAttribute("data-turbo-frame") || this.element.getAttribute("target")
+    const id = this.findFrameTarget(element, submitter)
     return getFrameElementById(id) ?? this.element
   }
 
