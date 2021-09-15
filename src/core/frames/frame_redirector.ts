@@ -24,8 +24,7 @@ export class FrameRedirector implements LinkInterceptorDelegate, FormInterceptor
   }
 
   shouldInterceptLinkClick(element: Element, url: string) {
-    const frame = this.findFrameElement(element)
-    return frame ? frame != element.closest("turbo-frame") : false
+    return this.shouldRedirect(element)
   }
 
   linkClickIntercepted(element: Element, url: string) {
@@ -37,7 +36,7 @@ export class FrameRedirector implements LinkInterceptorDelegate, FormInterceptor
   }
 
   shouldInterceptFormSubmission(element: HTMLFormElement, submitter?: HTMLElement) {
-    return !!this.findFrameElement(element, submitter)
+    return this.shouldRedirect(element, submitter)
   }
 
   formSubmissionIntercepted(element: HTMLFormElement, submitter?: HTMLElement) {
@@ -48,8 +47,22 @@ export class FrameRedirector implements LinkInterceptorDelegate, FormInterceptor
     }
   }
 
+  private shouldRedirect(element: Element, submitter?: HTMLElement) {
+    const frame = this.findFrameElement(element, submitter)
+
+    if (frame) {
+       if (frame == element.closest("turbo-frame")) {
+         return frame.getAttribute("target") == "_top" || element.getAttribute("data-turbo-frame") == "_top"
+       } else {
+         return true
+       }
+     } else {
+       return false
+     }
+  }
+
   private findFrameElement(element: Element, submitter?: HTMLElement) {
-    const id = submitter?.getAttribute("data-turbo-frame") || element.getAttribute("data-turbo-frame") || this.element.getAttribute("target")
+    const id = submitter?.getAttribute("data-turbo-frame") || element.getAttribute("data-turbo-frame")
 
     if (id && id != "_top") {
       const frame = this.element.querySelector(`#${id}:not([disabled])`)
