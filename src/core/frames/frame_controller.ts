@@ -261,7 +261,7 @@ export class FrameController implements AppearanceObserverDelegate, FetchRequest
   }
 
   private findFrameElement(element: Element, submitter?: HTMLElement) {
-    const id = submitter?.getAttribute("data-turbo-frame") || element.getAttribute("data-turbo-frame")
+    const id = submitter?.getAttribute("data-turbo-frame") || element.getAttribute("data-turbo-frame") || this.element.getAttribute("target")
     return getFrameElementById(id) ?? this.element
   }
 
@@ -309,7 +309,7 @@ export class FrameController implements AppearanceObserverDelegate, FetchRequest
       return false
     }
 
-    return true
+    return this.element == element.closest("turbo-frame:not([disabled])")
   }
 
   // Computed properties
