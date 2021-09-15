@@ -1,6 +1,7 @@
 import { FormInterceptor, FormInterceptorDelegate } from "./form_interceptor"
 import { FrameElement } from "../../elements/frame_element"
 import { LinkInterceptor, LinkInterceptorDelegate } from "./link_interceptor"
+import { FetchMethod, fetchMethodFromString } from "../../http/fetch_request"
 
 export class FrameRedirector implements LinkInterceptorDelegate, FormInterceptorDelegate {
   readonly element: Element
@@ -51,15 +52,20 @@ export class FrameRedirector implements LinkInterceptorDelegate, FormInterceptor
     const frame = this.findFrameElement(element, submitter)
 
     if (frame) {
-      const target = frame.getAttribute("target")
-
       if (frame == element.closest("turbo-frame")) {
         if (element instanceof HTMLFormElement) {
-          const frameTarget = element.getAttribute("data-turbo-frame")
+          const target = submitter?.getAttribute("data-turbo-frame")
+            || element.getAttribute("data-turbo-frame")
+            || frame.getAttribute("target")
+          const method = submitter?.getAttribute("formmethod") || element.getAttribute("method") || ""
 
-          return target == "_top" ||  frameTarget == "_top"
+          if (fetchMethodFromString(method) == FetchMethod.get) {
+            return false
+          } else {
+            return target == "_top"
+          }
         } else {
-          return target == "_top"
+          return frame.getAttribute("target") == "_top"
         }
       } else {
         return true
@@ -73,13 +79,15 @@ export class FrameRedirector implements LinkInterceptorDelegate, FormInterceptor
     const id = element.getAttribute("data-turbo-frame") || submitter?.getAttribute("data-turbo-frame")
 
     if (id == "_top") {
-      return element.closest<FrameElement>(`turbo-frame:not([disabled])`)
+      return element.closest<FrameElement>("turbo-frame:not([disabled])")
     } else if (id) {
       const frame = this.element.querySelector(`#${id}:not([disabled])`)
 
       if (frame instanceof FrameElement) {
         return frame
       }
+    } else {
+      return element.closest<FrameElement>("turbo-frame:not([disabled])")
     }
   }
 }

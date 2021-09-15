@@ -203,8 +203,8 @@ export class FrameController implements AppearanceObserverDelegate, FetchRequest
 
   formSubmissionSucceededWithResponse(formSubmission: FormSubmission, response: FetchResponse) {
     const frame = this.findFrameElement(formSubmission.formElement, formSubmission.submitter)
-    const target = formSubmission.formElement.getAttribute("data-turbo-frame")
-      || formSubmission.submitter?.getAttribute("data-turbo-frame")
+    const target = formSubmission.submitter?.getAttribute("data-turbo-frame")
+      || formSubmission.formElement.getAttribute("data-turbo-frame")
       || frame.getAttribute("target")
 
     if (response.redirected && target == "_top") {

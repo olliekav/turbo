@@ -217,11 +217,19 @@
       </div>
       <form action="/__turbo/redirect" method="post" class="redirect" data-turbo-frame="_top">
         <input type="hidden" name="path" value="/src/tests/fixtures/one.html">
-        <button>303 and redirect _top</button>
+        <button>303 data-turbo-frame="_top"</button>
       </form>
       <form class="unprocessable_entity" action="/__turbo/reject" method="post" data-turbo-frame="_top">
         <input type="hidden" name="status" value="422">
-        <button>422</button>
+        <button>422 form[data-turbo-frame="_top"]</button>
+      </form>
+      <form class="unprocessable_entity" action="/__turbo/reject" method="post">
+        <input type="hidden" name="status" value="422">
+        <button data-turbo-frame="_top">422 button[data-turbo-frame="_top"]</button>
+      </form>
+      <form class="unprocessable_entity" action="/__turbo/reject" method="post">
+        <input type="hidden" name="status" value="422">
+        <button>422 turbo-frame[target="_top"]</button>
       </form>
     </turbo-frame>
     <a href="/__turbo/messages?content=Link!&type=stream" data-turbo-method="post" id="link-method-outside-frame">Stream link outside frame</a>
