@@ -12,6 +12,7 @@ import { FrameView } from "./frame_view"
 import { LinkInterceptor, LinkInterceptorDelegate } from "./link_interceptor"
 import { FrameRenderer } from "./frame_renderer"
 import { session } from "../index"
+import { isAction } from "../types"
 
 export class FrameController implements AppearanceObserverDelegate, FetchRequestDelegate, FormInterceptorDelegate, FormSubmissionDelegate, FrameElementDelegate, LinkInterceptorDelegate, ViewDelegate<Snapshot<FrameElement>> {
   readonly element: FrameElement
@@ -202,6 +203,9 @@ export class FrameController implements AppearanceObserverDelegate, FetchRequest
 
   formSubmissionSucceededWithResponse(formSubmission: FormSubmission, response: FetchResponse) {
     const frame = this.findFrameElement(formSubmission.formElement, formSubmission.submitter)
+
+    this.proposeVisitIfNavigatedWithAction(frame, formSubmission.formElement, formSubmission.submitter)
+
     frame.delegate.loadResponse(response)
   }
 
@@ -246,8 +250,26 @@ export class FrameController implements AppearanceObserverDelegate, FetchRequest
 
   private navigateFrame(element: Element, url: string, submitter?: HTMLElement) {
     const frame = this.findFrameElement(element, submitter)
+
+    this.proposeVisitIfNavigatedWithAction(frame, element, submitter)
+
     frame.setAttribute("reloadable", "")
     frame.src = url
+  }
+
+  private proposeVisitIfNavigatedWithAction(frame: FrameElement, element: Element, submitter?: HTMLElement) {
+    const action = submitter?.getAttribute("data-turbo-action") || element.getAttribute("data-turbo-action") || frame.getAttribute("data-turbo-action")
+
+    if (isAction(action)) {
+      const proposeVisit = async (event: Event) => {
+        const { detail: { fetchResponse: { location, statusCode } } } = event as CustomEvent
+        const responseHTML = document.documentElement.outerHTML
+
+        session.visit(location, { willRender: false, action, response: { statusCode, responseHTML } })
+      }
+
+      frame.addEventListener("turbo:frame-render", proposeVisit , { once: true })
+    }
   }
 
   private findFrameElement(element: Element, submitter?: HTMLElement) {
