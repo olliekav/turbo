@@ -2,7 +2,7 @@ import { FrameElement, FrameElementDelegate, FrameLoadingStyle } from "../../ele
 import { FetchMethod, FetchRequest, FetchRequestDelegate, FetchRequestHeaders } from "../../http/fetch_request"
 import { FetchResponse } from "../../http/fetch_response"
 import { AppearanceObserver, AppearanceObserverDelegate } from "../../observers/appearance_observer"
-import { parseHTMLDocument } from "../../util"
+import { findAttribute, parseHTMLDocument } from "../../util"
 import { FormSubmission, FormSubmissionDelegate } from "../drive/form_submission"
 import { Snapshot } from "../snapshot"
 import { ViewDelegate } from "../view"
@@ -258,7 +258,7 @@ export class FrameController implements AppearanceObserverDelegate, FetchRequest
   }
 
   private proposeVisitIfNavigatedWithAction(frame: FrameElement, element: Element, submitter?: HTMLElement) {
-    const action = submitter?.getAttribute("data-turbo-action") || element.getAttribute("data-turbo-action") || frame.getAttribute("data-turbo-action")
+    const action = findAttribute("data-turbo-action", submitter, element, frame)
 
     if (isAction(action)) {
       const proposeVisit = async (event: Event) => {
@@ -273,7 +273,7 @@ export class FrameController implements AppearanceObserverDelegate, FetchRequest
   }
 
   private findFrameElement(element: Element, submitter?: HTMLElement) {
-    const id = submitter?.getAttribute("data-turbo-frame") || element.getAttribute("data-turbo-frame") || this.element.getAttribute("target")
+    const id = findAttribute("data-turbo-frame", submitter, element) || this.element.getAttribute("target")
     return getFrameElementById(id) ?? this.element
   }
 
@@ -300,7 +300,7 @@ export class FrameController implements AppearanceObserverDelegate, FetchRequest
   }
 
   private shouldInterceptNavigation(element: Element, submitter?: Element) {
-    const id = submitter?.getAttribute("data-turbo-frame") || element.getAttribute("data-turbo-frame") || this.element.getAttribute("target")
+    const id = findAttribute("data-turbo-frame", submitter, element) || this.element.getAttribute("target")
 
     if (!this.enabled || id == "_top") {
       return false

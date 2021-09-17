@@ -49,3 +49,9 @@ export function uuid() {
     }
   }).join("")
 }
+
+export function findAttribute(attributeName: string, ...elements: (Element|undefined)[]) {
+  const element = elements.find(element => element?.hasAttribute(attributeName))
+
+  return element?.getAttribute(attributeName)
+}
