@@ -1,6 +1,7 @@
 import { FormInterceptor, FormInterceptorDelegate } from "./form_interceptor"
 import { FrameElement } from "../../elements/frame_element"
 import { LinkInterceptor, LinkInterceptorDelegate } from "./link_interceptor"
+import { FormSubmission } from "../drive/form_submission"
 
 export class FrameRedirector implements LinkInterceptorDelegate, FormInterceptorDelegate {
   readonly element: Element
@@ -35,15 +36,15 @@ export class FrameRedirector implements LinkInterceptorDelegate, FormInterceptor
     }
   }
 
-  shouldInterceptFormSubmission(element: HTMLFormElement, submitter: HTMLElement | null) {
-    return this.shouldRedirect(element, submitter)
+  shouldInterceptFormSubmission({ formElement, submitter }: FormSubmission) {
+    return this.shouldRedirect(formElement, submitter)
   }
 
-  formSubmissionIntercepted(element: HTMLFormElement, submitter: HTMLElement | null) {
-    const frame = this.findFrameElement(element, submitter)
+  formSubmissionIntercepted(formSubmission: FormSubmission) {
+    const frame = this.findFrameElement(formSubmission.formElement, formSubmission.submitter)
     if (frame) {
       frame.removeAttribute("reloadable")
-      frame.delegate.formSubmissionIntercepted(element, submitter)
+      frame.delegate.formSubmissionIntercepted(formSubmission)
     }
   }
 

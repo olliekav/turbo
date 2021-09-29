@@ -1,6 +1,8 @@
+import { FormSubmission } from "../core/drive/form_submission"
+
 export interface FormSubmitObserverDelegate {
-  willSubmitForm(form: HTMLFormElement, submitter: HTMLElement | null): boolean
-  formSubmitted(form: HTMLFormElement, submitter: HTMLElement | null): void
+  willSubmitForm(formSubmission: FormSubmission): boolean
+  formSubmitted(formSubmitted: FormSubmission): void
 }
 
 export class FormSubmitObserver {
@@ -36,11 +38,12 @@ export class FormSubmitObserver {
       const submitter = event.submitter
 
       if (form) {
+        const formSubmission = new FormSubmission(form, event.submitter)
         const method = submitter?.getAttribute("formmethod") || form.method
 
-        if (method != "dialog" && this.delegate.willSubmitForm(form, submitter)) {
+        if (method != "dialog" && this.delegate.willSubmitForm(formSubmission)) {
           event.preventDefault()
-          this.delegate.formSubmitted(form, submitter)
+          this.delegate.formSubmitted(formSubmission)
         }
       }
     }

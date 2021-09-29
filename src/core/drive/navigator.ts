@@ -2,6 +2,7 @@ import { Action, isAction } from "../types"
 import { FetchMethod } from "../../http/fetch_request"
 import { FetchResponse } from "../../http/fetch_response"
 import { FormSubmission } from "./form_submission"
+import { FormSubmissionRequest } from "./form_submission_request"
 import { expandURL, getAnchor, getRequestURL, Locatable, locationIsVisitable } from "../url"
 import { Visit, VisitDelegate, VisitOptions } from "./visit"
 import { PageSnapshot } from "./page_snapshot"
@@ -14,7 +15,7 @@ export type NavigatorDelegate = VisitDelegate & {
 
 export class Navigator {
   readonly delegate: NavigatorDelegate
-  formSubmission?: FormSubmission
+  formSubmissionRequest?: FormSubmissionRequest
   currentVisit?: Visit
 
   constructor(delegate: NavigatorDelegate) {
@@ -40,21 +41,21 @@ export class Navigator {
     this.currentVisit.start()
   }
 
-  submitForm(form: HTMLFormElement, submitter: HTMLElement | null) {
+  submitForm(formSubmission: FormSubmission) {
     this.stop()
-    this.formSubmission = new FormSubmission(this, form, submitter, true)
+    this.formSubmissionRequest = new FormSubmissionRequest(this, formSubmission, true)
 
-    if (this.formSubmission.isIdempotent) {
-      this.proposeVisit(this.formSubmission.fetchRequest.url, { action: this.getActionForFormSubmission(this.formSubmission) })
+    if (this.formSubmissionRequest.isIdempotent) {
+      this.proposeVisit(this.formSubmissionRequest.fetchRequest.url, { action: this.getActionForFormSubmission(this.formSubmissionRequest) })
     } else {
-      this.formSubmission.start()
+      this.formSubmissionRequest.start()
     }
   }
 
   stop() {
-    if (this.formSubmission) {
-      this.formSubmission.stop()
-      delete this.formSubmission
+    if (this.formSubmissionRequest) {
+      this.formSubmissionRequest.stop()
+      delete this.formSubmissionRequest
     }
 
     if (this.currentVisit) {
@@ -85,7 +86,7 @@ export class Navigator {
   }
 
   async formSubmissionSucceededWithResponse(formSubmission: FormSubmission, fetchResponse: FetchResponse) {
-    if (formSubmission == this.formSubmission) {
+    if (formSubmission == this.formSubmissionRequest?.formSubmission) {
       const responseHTML = await fetchResponse.responseHTML
       if (responseHTML) {
         if (formSubmission.method != FetchMethod.get) {

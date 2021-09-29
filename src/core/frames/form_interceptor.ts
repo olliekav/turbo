@@ -1,6 +1,8 @@
+import { FormSubmission } from "../drive/form_submission"
+
 export interface FormInterceptorDelegate {
-  shouldInterceptFormSubmission(element: HTMLFormElement, submitter: HTMLElement | null): boolean
-  formSubmissionIntercepted(element: HTMLFormElement, submitter: HTMLElement | null): void
+  shouldInterceptFormSubmission(formSubmission: FormSubmission): boolean
+  formSubmissionIntercepted(formSubmission: FormSubmission): void
 }
 
 export class FormInterceptor {
@@ -24,10 +26,11 @@ export class FormInterceptor {
     const form = event.target
     if (form instanceof HTMLFormElement && form.closest("turbo-frame, html") == this.element) {
       const submitter = event.submitter
-      if (this.delegate.shouldInterceptFormSubmission(form, submitter)) {
+      const formSubmission = new FormSubmission(form, submitter)
+      if (this.delegate.shouldInterceptFormSubmission(formSubmission)) {
         event.preventDefault()
         event.stopImmediatePropagation()
-        this.delegate.formSubmissionIntercepted(form, submitter)
+        this.delegate.formSubmissionIntercepted(formSubmission)
       }
     }
   })

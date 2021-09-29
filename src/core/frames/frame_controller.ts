@@ -3,7 +3,8 @@ import { FetchMethod, FetchRequest, FetchRequestDelegate, FetchRequestHeaders } 
 import { FetchResponse } from "../../http/fetch_response"
 import { AppearanceObserver, AppearanceObserverDelegate } from "../../observers/appearance_observer"
 import { parseHTMLDocument } from "../../util"
-import { FormSubmission, FormSubmissionDelegate } from "../drive/form_submission"
+import { FormSubmission } from "../drive/form_submission"
+import { FormSubmissionRequest, FormSubmissionRequestDelegate } from "../drive/form_submission_request"
 import { Snapshot } from "../snapshot"
 import { ViewDelegate } from "../view"
 import { expandURL, urlsAreEqual, Locatable } from "../url"
@@ -13,14 +14,14 @@ import { LinkInterceptor, LinkInterceptorDelegate } from "./link_interceptor"
 import { FrameRenderer } from "./frame_renderer"
 import { session } from "../index"
 
-export class FrameController implements AppearanceObserverDelegate, FetchRequestDelegate, FormInterceptorDelegate, FormSubmissionDelegate, FrameElementDelegate, LinkInterceptorDelegate, ViewDelegate<Snapshot<FrameElement>> {
+export class FrameController implements AppearanceObserverDelegate, FetchRequestDelegate, FormInterceptorDelegate, FormSubmissionRequestDelegate, FrameElementDelegate, LinkInterceptorDelegate, ViewDelegate<Snapshot<FrameElement>> {
   readonly element: FrameElement
   readonly view: FrameView
   readonly appearanceObserver: AppearanceObserver
   readonly linkInterceptor: LinkInterceptor
   readonly formInterceptor: FormInterceptor
   currentURL?: string | null
-  formSubmission?: FormSubmission
+  formSubmissionRequest?: FormSubmissionRequest
   private resolveVisitPromise = () => {}
   private connected = false
   private hasBeenLoaded = false
@@ -140,23 +141,23 @@ export class FrameController implements AppearanceObserverDelegate, FetchRequest
 
   // Form interceptor delegate
 
-  shouldInterceptFormSubmission(element: HTMLFormElement, submitter: HTMLElement | null) {
-    return this.shouldInterceptNavigation(element, submitter)
+  shouldInterceptFormSubmission({ formElement, submitter }: FormSubmission) {
+    return this.shouldInterceptNavigation(formElement, submitter)
   }
 
-  formSubmissionIntercepted(element: HTMLFormElement, submitter: HTMLElement | null) {
-    if (this.formSubmission) {
-      this.formSubmission.stop()
+  formSubmissionIntercepted(formSubmission: FormSubmission) {
+    if (this.formSubmissionRequest) {
+      this.formSubmissionRequest.stop()
     }
 
     this.reloadable = false
-    this.formSubmission = new FormSubmission(this, element, submitter)
-    if (this.formSubmission.fetchRequest.isIdempotent) {
-      this.navigateFrame(element, this.formSubmission.fetchRequest.url.href, submitter)
+    this.formSubmissionRequest = new FormSubmissionRequest(this, formSubmission)
+    if (this.formSubmissionRequest.isIdempotent) {
+      this.navigateFrame(formSubmission.formElement, this.formSubmissionRequest.fetchRequest.url.href, formSubmission.submitter)
     } else {
-      const { fetchRequest } = this.formSubmission
+      const { fetchRequest } = this.formSubmissionRequest
       this.prepareHeadersForRequest(fetchRequest.headers, fetchRequest)
-      this.formSubmission.start()
+      this.formSubmissionRequest.start()
     }
   }
 
@@ -344,7 +345,7 @@ export class FrameController implements AppearanceObserverDelegate, FetchRequest
   }
 
   get isLoading() {
-    return this.formSubmission !== undefined || this.resolveVisitPromise() !== undefined
+    return this.formSubmissionRequest !== undefined || this.resolveVisitPromise() !== undefined
   }
 
   get isActive() {

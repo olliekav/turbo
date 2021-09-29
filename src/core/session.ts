@@ -2,6 +2,7 @@ import { Adapter } from "./native/adapter"
 import { BrowserAdapter } from "./native/browser_adapter"
 import { CacheObserver } from "../observers/cache_observer"
 import { FormSubmitObserver, FormSubmitObserverDelegate } from "../observers/form_submit_observer"
+import { FormSubmission } from "./drive/form_submission"
 import { FrameRedirector } from "./frames/frame_redirector"
 import { History, HistoryDelegate } from "./drive/history"
 import { LinkClickObserver, LinkClickObserverDelegate } from "../observers/link_click_observer"
@@ -188,12 +189,12 @@ export class Session implements FormSubmitObserverDelegate, HistoryDelegate, Lin
 
   // Form submit observer delegate
 
-  willSubmitForm(form: HTMLFormElement, submitter: HTMLElement | null): boolean {
-    return this.elementDriveEnabled(form) && (!submitter || this.elementDriveEnabled(submitter))
+  willSubmitForm({ formElement, submitter }: FormSubmission): boolean {
+    return this.elementDriveEnabled(formElement) && (!submitter || this.elementDriveEnabled(submitter))
   }
 
-  formSubmitted(form: HTMLFormElement, submitter: HTMLElement | null) {
-    this.navigator.submitForm(form, submitter)
+  formSubmitted(formSubmission: FormSubmission) {
+    this.navigator.submitForm(formSubmission)
   }
 
   // Page observer delegate

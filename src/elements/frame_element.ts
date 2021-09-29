@@ -1,4 +1,5 @@
 import { FetchResponse } from "../http/fetch_response"
+import { FormSubmission } from "../core/drive/form_submission"
 
 export enum FrameLoadingStyle { eager = "eager", lazy = "lazy" }
 
@@ -8,7 +9,7 @@ export interface FrameElementDelegate {
   loadingStyleChanged(): void
   sourceURLChanged(): void
   disabledChanged(): void
-  formSubmissionIntercepted(element: HTMLFormElement, submitter: HTMLElement | null): void
+  formSubmissionIntercepted(formSubmission: FormSubmission): void
   loadResponse(response: FetchResponse): void
   isLoading: boolean
 }
