@@ -34,9 +34,11 @@ function clickCaptured(event: Event) {
   addEventListener("click", clickCaptured, true)
 
   Object.defineProperty(prototype, "submitter", {
-    get(): HTMLElement | undefined {
+    get(): HTMLElement | null {
       if (this.type == "submit" && this.target instanceof HTMLFormElement) {
-        return submittersByForm.get(this.target)
+        return submittersByForm.get(this.target) || null
+      } else {
+        return null
       }
     }
   })

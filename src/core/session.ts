@@ -188,11 +188,11 @@ export class Session implements FormSubmitObserverDelegate, HistoryDelegate, Lin
 
   // Form submit observer delegate
 
-  willSubmitForm(form: HTMLFormElement, submitter?: HTMLElement): boolean {
+  willSubmitForm(form: HTMLFormElement, submitter: HTMLElement | null): boolean {
     return this.elementDriveEnabled(form) && (!submitter || this.elementDriveEnabled(submitter))
   }
 
-  formSubmitted(form: HTMLFormElement, submitter?: HTMLElement) {
+  formSubmitted(form: HTMLFormElement, submitter: HTMLElement | null) {
     this.navigator.submitForm(form, submitter)
   }
 

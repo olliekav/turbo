@@ -1,6 +1,6 @@
 export interface FormInterceptorDelegate {
-  shouldInterceptFormSubmission(element: HTMLFormElement, submitter?: HTMLElement): boolean
-  formSubmissionIntercepted(element: HTMLFormElement, submitter?: HTMLElement): void
+  shouldInterceptFormSubmission(element: HTMLFormElement, submitter: HTMLElement | null): boolean
+  formSubmissionIntercepted(element: HTMLFormElement, submitter: HTMLElement | null): void
 }
 
 export class FormInterceptor {
@@ -23,7 +23,7 @@ export class FormInterceptor {
   submitBubbled = <EventListener>((event: SubmitEvent) => {
     const form = event.target
     if (form instanceof HTMLFormElement && form.closest("turbo-frame, html") == this.element) {
-      const submitter = event.submitter || undefined
+      const submitter = event.submitter
       if (this.delegate.shouldInterceptFormSubmission(form, submitter)) {
         event.preventDefault()
         event.stopImmediatePropagation()

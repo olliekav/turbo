@@ -35,11 +35,11 @@ export class FrameRedirector implements LinkInterceptorDelegate, FormInterceptor
     }
   }
 
-  shouldInterceptFormSubmission(element: HTMLFormElement, submitter?: HTMLElement) {
+  shouldInterceptFormSubmission(element: HTMLFormElement, submitter: HTMLElement | null) {
     return this.shouldRedirect(element, submitter)
   }
 
-  formSubmissionIntercepted(element: HTMLFormElement, submitter?: HTMLElement) {
+  formSubmissionIntercepted(element: HTMLFormElement, submitter: HTMLElement | null) {
     const frame = this.findFrameElement(element, submitter)
     if (frame) {
       frame.removeAttribute("reloadable")
@@ -47,12 +47,12 @@ export class FrameRedirector implements LinkInterceptorDelegate, FormInterceptor
     }
   }
 
-  private shouldRedirect(element: Element, submitter?: HTMLElement) {
+  private shouldRedirect(element: Element, submitter: HTMLElement | null = null) {
     const frame = this.findFrameElement(element, submitter)
     return frame ? frame != element.closest("turbo-frame") : false
   }
 
-  private findFrameElement(element: Element, submitter?: HTMLElement) {
+  private findFrameElement(element: Element, submitter: HTMLElement | null = null) {
     const id = submitter?.getAttribute("data-turbo-frame") || element.getAttribute("data-turbo-frame")
     if (id && id != "_top") {
       const frame = this.element.querySelector(`#${id}:not([disabled])`)

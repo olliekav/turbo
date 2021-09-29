@@ -8,7 +8,7 @@ export interface FrameElementDelegate {
   loadingStyleChanged(): void
   sourceURLChanged(): void
   disabledChanged(): void
-  formSubmissionIntercepted(element: HTMLFormElement, submitter?: HTMLElement): void
+  formSubmissionIntercepted(element: HTMLFormElement, submitter: HTMLElement | null): void
   loadResponse(response: FetchResponse): void
   isLoading: boolean
 }

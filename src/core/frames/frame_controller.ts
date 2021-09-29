@@ -140,11 +140,11 @@ export class FrameController implements AppearanceObserverDelegate, FetchRequest
 
   // Form interceptor delegate
 
-  shouldInterceptFormSubmission(element: HTMLFormElement, submitter?: Element) {
+  shouldInterceptFormSubmission(element: HTMLFormElement, submitter: HTMLElement | null) {
     return this.shouldInterceptNavigation(element, submitter)
   }
 
-  formSubmissionIntercepted(element: HTMLFormElement, submitter?: HTMLElement) {
+  formSubmissionIntercepted(element: HTMLFormElement, submitter: HTMLElement | null) {
     if (this.formSubmission) {
       this.formSubmission.stop()
     }
@@ -244,13 +244,13 @@ export class FrameController implements AppearanceObserverDelegate, FetchRequest
     })
   }
 
-  private navigateFrame(element: Element, url: string, submitter?: HTMLElement) {
+  private navigateFrame(element: Element, url: string, submitter: HTMLElement | null = null) {
     const frame = this.findFrameElement(element, submitter)
     frame.setAttribute("reloadable", "")
     frame.src = url
   }
 
-  private findFrameElement(element: Element, submitter?: HTMLElement) {
+  private findFrameElement(element: Element, submitter: HTMLElement | null = null) {
     const id = submitter?.getAttribute("data-turbo-frame") || element.getAttribute("data-turbo-frame") || this.element.getAttribute("target")
     return getFrameElementById(id) ?? this.element
   }
@@ -277,7 +277,7 @@ export class FrameController implements AppearanceObserverDelegate, FetchRequest
     return new FrameElement()
   }
 
-  private shouldInterceptNavigation(element: Element, submitter?: Element) {
+  private shouldInterceptNavigation(element: Element, submitter: HTMLElement | null = null) {
     const id = submitter?.getAttribute("data-turbo-frame") || element.getAttribute("data-turbo-frame") || this.element.getAttribute("target")
 
     if (!this.enabled || id == "_top") {

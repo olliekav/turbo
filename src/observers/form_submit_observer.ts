@@ -1,6 +1,6 @@
 export interface FormSubmitObserverDelegate {
-  willSubmitForm(form: HTMLFormElement, submitter?: HTMLElement): boolean
-  formSubmitted(form: HTMLFormElement, submitter?: HTMLElement): void
+  willSubmitForm(form: HTMLFormElement, submitter: HTMLElement | null): boolean
+  formSubmitted(form: HTMLFormElement, submitter: HTMLElement | null): void
 }
 
 export class FormSubmitObserver {
@@ -32,8 +32,8 @@ export class FormSubmitObserver {
 
   submitBubbled = <EventListener>((event: SubmitEvent) => {
     if (!event.defaultPrevented) {
-      const form = event.target instanceof HTMLFormElement ? event.target : undefined
-      const submitter = event.submitter || undefined
+      const form = event.target instanceof HTMLFormElement ? event.target : null
+      const submitter = event.submitter
 
       if (form) {
         const method = submitter?.getAttribute("formmethod") || form.method

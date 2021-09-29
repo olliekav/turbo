@@ -42,14 +42,14 @@ function formEnctypeFromString(encoding: string): FormEnctype {
 export class FormSubmission {
   readonly delegate: FormSubmissionDelegate
   readonly formElement: HTMLFormElement
-  readonly submitter?: HTMLElement
+  readonly submitter: HTMLElement | null
   readonly formData: FormData
   readonly fetchRequest: FetchRequest
   readonly mustRedirect: boolean
   state = FormSubmissionState.initialized
   result?: FormSubmissionResult
 
-  constructor(delegate: FormSubmissionDelegate, formElement: HTMLFormElement, submitter?: HTMLElement, mustRedirect = false) {
+  constructor(delegate: FormSubmissionDelegate, formElement: HTMLFormElement, submitter: HTMLElement | null = null, mustRedirect = false) {
     this.delegate = delegate
     this.formElement = formElement
     this.submitter = submitter
@@ -169,7 +169,7 @@ export class FormSubmission {
   }
 }
 
-function buildFormData(formElement: HTMLFormElement, submitter?: HTMLElement): FormData {
+function buildFormData(formElement: HTMLFormElement, submitter: HTMLElement | null): FormData {
   const formData = new FormData(formElement)
   const name = submitter?.getAttribute("name")
   const value = submitter?.getAttribute("value")
