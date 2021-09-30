@@ -1,37 +1,37 @@
 import { FormInterceptor, FormInterceptorDelegate } from "./form_interceptor"
 import { FrameElement } from "../../elements/frame_element"
-import { LinkInterceptor, LinkInterceptorDelegate } from "./link_interceptor"
+import { LinkClickObserver, LinkClickObserverDelegate } from "../../observers/link_click_observer"
 
-export class FrameRedirector implements LinkInterceptorDelegate, FormInterceptorDelegate {
+export class FrameRedirector implements LinkClickObserverDelegate, FormInterceptorDelegate {
   readonly element: Element
-  readonly linkInterceptor: LinkInterceptor
+  readonly linkClickObserver: LinkClickObserver
   readonly formInterceptor: FormInterceptor
 
   constructor(element: Element) {
     this.element = element
-    this.linkInterceptor = new LinkInterceptor(this, element)
+    this.linkClickObserver = new LinkClickObserver(this, element)
     this.formInterceptor = new FormInterceptor(this, element)
   }
 
   start() {
-    this.linkInterceptor.start()
+    this.linkClickObserver.start()
     this.formInterceptor.start()
   }
 
   stop() {
-    this.linkInterceptor.stop()
+    this.linkClickObserver.stop()
     this.formInterceptor.stop()
   }
 
-  shouldInterceptLinkClick(element: Element, url: string) {
-    return this.shouldRedirect(element)
+  willFollowLinkToLocation(element: Element, url: URL) {
+    return element.closest("turbo-frame") == null && this.shouldRedirect(element)
   }
 
-  linkClickIntercepted(element: Element, url: string) {
+  followedLinkToLocation(element: Element, url: URL) {
     const frame = this.findFrameElement(element)
     if (frame) {
       frame.setAttribute("reloadable", "")
-      frame.src = url
+      frame.src = url.href
     }
   }
 

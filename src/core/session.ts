@@ -29,7 +29,7 @@ export class Session implements FormSubmitObserverDelegate, HistoryDelegate, Lin
 
   readonly pageObserver = new PageObserver(this)
   readonly cacheObserver = new CacheObserver()
-  readonly linkClickObserver = new LinkClickObserver(this)
+  readonly linkClickObserver = new LinkClickObserver(this, document.documentElement)
   readonly formSubmitObserver = new FormSubmitObserver(this)
   readonly scrollObserver = new ScrollObserver(this)
   readonly streamObserver = new StreamObserver(this)
@@ -45,11 +45,11 @@ export class Session implements FormSubmitObserverDelegate, HistoryDelegate, Lin
     if (!this.started) {
       this.pageObserver.start()
       this.cacheObserver.start()
+      this.frameRedirector.start()
       this.linkClickObserver.start()
       this.formSubmitObserver.start()
       this.scrollObserver.start()
       this.streamObserver.start()
-      this.frameRedirector.start()
       this.history.start()
       this.started = true
       this.enabled = true
@@ -64,11 +64,11 @@ export class Session implements FormSubmitObserverDelegate, HistoryDelegate, Lin
     if (this.started) {
       this.pageObserver.stop()
       this.cacheObserver.stop()
+      this.frameRedirector.stop()
       this.linkClickObserver.stop()
       this.formSubmitObserver.stop()
       this.scrollObserver.stop()
       this.streamObserver.stop()
-      this.frameRedirector.stop()
       this.history.stop()
       this.started = false
     }

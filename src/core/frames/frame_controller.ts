@@ -9,15 +9,15 @@ import { ViewDelegate } from "../view"
 import { expandURL, urlsAreEqual, Locatable } from "../url"
 import { FormInterceptor, FormInterceptorDelegate } from "./form_interceptor"
 import { FrameView } from "./frame_view"
-import { LinkInterceptor, LinkInterceptorDelegate } from "./link_interceptor"
+import { LinkClickObserver, LinkClickObserverDelegate } from "../../observers/link_click_observer"
 import { FrameRenderer } from "./frame_renderer"
 import { session } from "../index"
 
-export class FrameController implements AppearanceObserverDelegate, FetchRequestDelegate, FormInterceptorDelegate, FormSubmissionDelegate, FrameElementDelegate, LinkInterceptorDelegate, ViewDelegate<Snapshot<FrameElement>> {
+export class FrameController implements AppearanceObserverDelegate, FetchRequestDelegate, FormInterceptorDelegate, FormSubmissionDelegate, FrameElementDelegate, LinkClickObserverDelegate, ViewDelegate<Snapshot<FrameElement>> {
   readonly element: FrameElement
   readonly view: FrameView
   readonly appearanceObserver: AppearanceObserver
-  readonly linkInterceptor: LinkInterceptor
+  readonly linkClickObserver: LinkClickObserver
   readonly formInterceptor: FormInterceptor
   currentURL?: string | null
   formSubmission?: FormSubmission
@@ -30,7 +30,7 @@ export class FrameController implements AppearanceObserverDelegate, FetchRequest
     this.element = element
     this.view = new FrameView(this, this.element)
     this.appearanceObserver = new AppearanceObserver(this, this.element)
-    this.linkInterceptor = new LinkInterceptor(this, this.element)
+    this.linkClickObserver = new LinkClickObserver(this, this.element)
     this.formInterceptor = new FormInterceptor(this, this.element)
   }
 
@@ -41,7 +41,7 @@ export class FrameController implements AppearanceObserverDelegate, FetchRequest
       if (this.loadingStyle == FrameLoadingStyle.lazy) {
         this.appearanceObserver.start()
       }
-      this.linkInterceptor.start()
+      this.linkClickObserver.start()
       this.formInterceptor.start()
       this.sourceURLChanged()
     }
@@ -51,7 +51,7 @@ export class FrameController implements AppearanceObserverDelegate, FetchRequest
     if (this.connected) {
       this.connected = false
       this.appearanceObserver.stop()
-      this.linkInterceptor.stop()
+      this.linkClickObserver.stop()
       this.formInterceptor.stop()
     }
   }
@@ -125,17 +125,18 @@ export class FrameController implements AppearanceObserverDelegate, FetchRequest
 
   // Link interceptor delegate
 
-  shouldInterceptLinkClick(element: Element, url: string) {
+  willFollowLinkToLocation(element: Element, url: URL) {
     if (element.hasAttribute("data-turbo-method")) {
       return false
     } else {
-      return this.shouldInterceptNavigation(element)
+      return element.closest("turbo-frame") == this.element &&
+        this.shouldInterceptNavigation(element)
     }
   }
 
-  linkClickIntercepted(element: Element, url: string) {
+  followedLinkToLocation(element: Element, url: URL) {
     this.reloadable = true
-    this.navigateFrame(element, url)
+    this.navigateFrame(element, url.href)
   }
 
   // Form interceptor delegate
